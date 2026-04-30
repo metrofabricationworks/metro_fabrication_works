@@ -7,7 +7,7 @@ import { Menu, X, Phone } from 'lucide-react';
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const phone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+91 99999 99999';
+  const phone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+91 9966552243';
 
   const navigation = [
     { name: 'Home', href: '/' },

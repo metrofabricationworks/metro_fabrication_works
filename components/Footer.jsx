@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
-  const phone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+91 99999 99999';
+  const phone = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+91 9966552243';
 
   return (
     <footer className="bg-primary text-white">
@@ -12,7 +12,7 @@ export default function Footer() {
           <div>
             <h3 className="text-2xl font-bold mb-4">Metro Fabrication Works</h3>
             <p className="text-gray-300 mb-6">
-              Professional metal fabrication services in Vijayawada since 2021.
+              Professional metal fabrication services in telangana since 2000.
             </p>
 
             <div className="space-y-4">
@@ -20,10 +20,10 @@ export default function Footer() {
                 <Phone size={20} /> {phone}
               </p>
               <p className="flex items-center gap-3 text-gray-300">
-                <Mail size={20} /> info@metrofabrication.in
+                <Mail size={20} /> metrofabricationhyd@gmail.com
               </p>
               <p className="flex items-center gap-3 text-gray-300">
-                <MapPin size={20} /> Vijayawada, Andhra Pradesh
+                <MapPin size={20} /> Hyderabad, Telangana
               </p>
             </div>
           </div>
@@ -43,14 +43,14 @@ export default function Footer() {
               ></iframe>
             </div>
             <p className="text-xs text-gray-400 mt-3 text-center">
-              📍 Your Shop Location, Vijayawada
+              📍 Your Shop Location, Musheerabad, Hyderabad
             </p>
           </div>
 
         </div>
 
         <div className="border-t border-gray-700 mt-12 pt-8 text-center text-sm text-gray-400">
-          © 2026 Metro Fabrication Works, Vijayawada. All Rights Reserved.
+          © 2026 Metro Fabrication Works, Hyderabad. All Rights Reserved.
         </div>
       </div>
     </footer>
