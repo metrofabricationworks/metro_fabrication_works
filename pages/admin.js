@@ -13,7 +13,7 @@ const CATEGORIES = [
   { value: 'doors',                label: 'Doors',                    group: 'Main' },
   { value: 'grills',               label: 'Grills',                   group: 'Main' },
   { value: 'staircase',            label: 'Staircase',                group: 'Main' },
-  { value: 'rolling-shutter',      label: 'Rolling Shutter',          group: 'Main' },
+
   { value: 'gates-sliding',        label: 'Gates → Sliding',          group: 'Gates' },
   { value: 'gates-foldable-single',label: 'Gates → Foldable (Single)',group: 'Gates' },
   { value: 'gates-foldable-double',label: 'Gates → Foldable (Double)',group: 'Gates' },
@@ -210,7 +210,6 @@ export default function Admin() {
                       <option value="doors">Doors</option>
                       <option value="grills">Grills</option>
                       <option value="staircase">Staircase</option>
-                      <option value="rolling-shutter">Rolling Shutter</option>
                     </optgroup>
                     <optgroup label="── Gates ──">
                       <option value="gates-sliding">Gates → Sliding</option>
@@ -312,7 +311,6 @@ export default function Admin() {
                     <option value="doors">Doors</option>
                     <option value="grills">Grills</option>
                     <option value="staircase">Staircase</option>
-                    <option value="rolling-shutter">Rolling Shutter</option>
                   </optgroup>
                   <optgroup label="── Gates ──">
                     <option value="gates-sliding">Gates → Sliding</option>
