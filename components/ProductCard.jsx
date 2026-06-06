@@ -17,9 +17,6 @@ export default function ProductCard({ product }) {
       'gates-foldable-double': 'Foldable Gate (Double)',
     }[product.category] || product.category;
 
-    // Build the WhatsApp message.
-    // WhatsApp does not support sending images via wa.me links programmatically,
-    // so we include the image URL in the message text so the team can view it.
     const imageNote = product.image
       ? `\nProduct Image: ${product.image}`
       : '';
@@ -41,15 +38,13 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover group flex flex-col">
-      {/* Image */}
-      <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
+      <div className="relative h-56 w-full bg-gray-100 overflow-hidden">
         <Image
           src={product.image || fallbackImage}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Category badge */}
         <div className="absolute top-3 left-3 bg-primary/80 text-white text-xs font-medium px-2.5 py-1 rounded-full capitalize backdrop-blur-sm">
           {product.category?.replace(/-/g, ' ') || 'Product'}
         </div>
