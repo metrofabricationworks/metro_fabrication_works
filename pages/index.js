@@ -40,29 +40,29 @@ function WeldSparks() {
       constructor() { this.reset(true); }
 
       reset(initial = false) {
-        // Origin: the "welding torch" spot — bottom-center of hero, slightly left
-        this.x  = canvas.width  * 0.38 + (Math.random() - 0.5) * 10;
-        this.y  = canvas.height * 0.72 + (Math.random() - 0.5) * 10;
+        // Origin: the "welding torch" spot — bottom-right corner of hero
+        this.x  = canvas.width  * 0.82 + (Math.random() - 0.5) * 14;
+        this.y  = canvas.height * 0.78 + (Math.random() - 0.5) * 14;
 
         // Random burst direction — mostly upward and sideways
         const angle = Math.random() * Math.PI * 2;
         const speed = initial
-          ? Math.random() * 3 + 0.5          // slower on first frame
-          : Math.random() * 5 + 1.5;
+          ? Math.random() * 4 + 1            // slower on first frame
+          : Math.random() * 7 + 2;
         this.vx  = Math.cos(angle) * speed;
-        this.vy  = Math.sin(angle) * speed - Math.random() * 3; // bias upward
+        this.vy  = Math.sin(angle) * speed - Math.random() * 4; // bias upward
 
         // Physics
         this.gravity  = 0.12 + Math.random() * 0.08;
-        this.drag     = 0.985;
+        this.drag     = 0.99;
 
         // Appearance
         this.life     = 0;
-        this.maxLife  = 40 + Math.random() * 60;
-        this.size     = 1.2 + Math.random() * 2.2;
+        this.maxLife  = 45 + Math.random() * 70;
+        this.size     = 2.5 + Math.random() * 4;
 
         // Colour: cycle between white-hot → orange → red
-        this.hue      = Math.random() < 0.4 ? 40 : Math.random() < 0.6 ? 20 : 0; // degrees
+        this.hue      = Math.random() < 0.4 ? 45 : Math.random() < 0.6 ? 25 : 10; // degrees
         this.trail    = [];
       }
 
@@ -86,9 +86,9 @@ function WeldSparks() {
         // Trail
         if (this.trail.length > 1) {
           ctx.save();
-          ctx.globalAlpha = alpha * 0.4;
-          ctx.strokeStyle = `hsl(${this.hue}, 100%, 70%)`;
-          ctx.lineWidth   = this.size * 0.5;
+          ctx.globalAlpha = Math.min(1, alpha * 0.9);
+          ctx.strokeStyle = `hsl(${this.hue}, 100%, 75%)`;
+          ctx.lineWidth   = this.size * 0.6;
           ctx.lineCap     = 'round';
           ctx.beginPath();
           this.trail.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
@@ -98,14 +98,14 @@ function WeldSparks() {
 
         // Core glow
         ctx.save();
-        ctx.globalAlpha = alpha;
-        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2.5);
-        grd.addColorStop(0,   `hsl(${this.hue}, 100%, 95%)`);
-        grd.addColorStop(0.4, `hsl(${this.hue}, 100%, 65%)`);
-        grd.addColorStop(1,   `hsla(${this.hue}, 100%, 40%, 0)`);
+        ctx.globalAlpha = Math.min(1, alpha * 1.2);
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3.5);
+        grd.addColorStop(0,   `hsl(${this.hue}, 100%, 97%)`);
+        grd.addColorStop(0.35, `hsl(${this.hue}, 100%, 68%)`);
+        grd.addColorStop(1,   `hsla(${this.hue}, 100%, 45%, 0)`);
         ctx.fillStyle = grd;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
@@ -113,22 +113,22 @@ function WeldSparks() {
 
     // Welding arc flash (the bright spot at the torch tip)
     const drawArc = (x, y) => {
-      const flash = ctx.createRadialGradient(x, y, 0, x, y, 18);
-      flash.addColorStop(0,   'rgba(255,255,220, 0.95)');
-      flash.addColorStop(0.3, 'rgba(255,200,80, 0.6)');
+      const flash = ctx.createRadialGradient(x, y, 0, x, y, 32);
+      flash.addColorStop(0,   'rgba(255,255,235, 1)');
+      flash.addColorStop(0.25, 'rgba(255,210,90, 0.85)');
       flash.addColorStop(1,   'rgba(255,120,0, 0)');
       ctx.save();
-      ctx.globalAlpha = 0.7 + Math.random() * 0.3; // slight flicker
+      ctx.globalAlpha = 0.75 + Math.random() * 0.25; // slight flicker
       ctx.fillStyle   = flash;
       ctx.beginPath();
-      ctx.arc(x, y, 18, 0, Math.PI * 2);
+      ctx.arc(x, y, 32, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     };
 
     // Create sparks — fewer on mobile for performance
     const isMobile  = window.innerWidth < 640;
-    const sparkCount = isMobile ? 35 : 70;
+    const sparkCount = isMobile ? 50 : 90;
     const sparks    = Array.from({ length: sparkCount }, () => {
       const s = new Spark();
       s.life  = Math.floor(Math.random() * s.maxLife); // stagger start
@@ -140,8 +140,8 @@ function WeldSparks() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Arc flash at torch origin
-      const ox = canvas.width * 0.38;
-      const oy = canvas.height * 0.72;
+      const ox = canvas.width * 0.82;
+      const oy = canvas.height * 0.78;
       drawArc(ox, oy);
 
       sparks.forEach(s => { s.update(); s.draw(ctx); });
@@ -178,13 +178,13 @@ export default function Home() {
         <div className="absolute inset-0 opacity-5"
           style={{ backgroundImage: 'radial-gradient(circle, #f97316 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-        {/* 🔥 WELD SPARKS — positioned in right half so text stays readable */}
-        <div className="absolute inset-0 opacity-90">
+        {/* 🔥 WELD SPARKS — bottom-right corner, full brightness */}
+        <div className="absolute inset-0">
           <WeldSparks />
         </div>
 
-        {/* Gradient mask so sparks fade toward the left (text side) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent pointer-events-none" />
+        {/* Light gradient mask on the left only, so text stays readable without hiding sparks */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/40 to-transparent pointer-events-none" style={{ width: '65%' }} />
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 md:py-20">
