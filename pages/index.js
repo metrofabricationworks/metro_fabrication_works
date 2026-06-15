@@ -19,9 +19,13 @@ const stats = [
   { value: '24hr',  label: 'Turnaround' },
 ];
 
-// ── Weld Sparks Canvas ────────────────────────────────────────────────────────
-function WeldSparks() {
+// ── Welder Scene: SVG arm+torch + bright sparks at the tip ───────────────────
+function WelderScene() {
   const canvasRef = useRef(null);
+
+  // Torch tip position as a fraction of the container (matches the SVG below)
+  const TIP_X = 0.655;
+  const TIP_Y = 0.32;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,40 +39,37 @@ function WeldSparks() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Spark particle class
     class Spark {
       constructor() { this.reset(true); }
 
       reset(initial = false) {
-        // Origin: the "welding torch" spot — bottom-right corner of hero
-        this.x  = canvas.width  * 0.82 + (Math.random() - 0.5) * 14;
-        this.y  = canvas.height * 0.78 + (Math.random() - 0.5) * 14;
+        const ox = canvas.width  * TIP_X;
+        const oy = canvas.height * TIP_Y;
+        this.x = ox + (Math.random() - 0.5) * 8;
+        this.y = oy + (Math.random() - 0.5) * 8;
 
-        // Random burst direction — mostly upward and sideways
-        const angle = Math.random() * Math.PI * 2;
-        const speed = initial
-          ? Math.random() * 4 + 1            // slower on first frame
-          : Math.random() * 7 + 2;
-        this.vx  = Math.cos(angle) * speed;
-        this.vy  = Math.sin(angle) * speed - Math.random() * 4; // bias upward
+        // Fountain spray — mostly upward (-135° to -45°)
+        const angle = -Math.PI * 0.75 + Math.random() * Math.PI * 0.5;
+        const speed = initial ? Math.random() * 4 + 1 : Math.random() * 7.5 + 2.5;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
 
-        // Physics
-        this.gravity  = 0.12 + Math.random() * 0.08;
-        this.drag     = 0.99;
+        this.gravity = 0.15 + Math.random() * 0.1;
+        this.drag    = 0.99;
 
-        // Appearance
-        this.life     = 0;
-        this.maxLife  = 45 + Math.random() * 70;
-        this.size     = 2.5 + Math.random() * 4;
+        this.life    = 0;
+        this.maxLife = 40 + Math.random() * 65;
+        this.size    = 3 + Math.random() * 5;
 
-        // Colour: cycle between white-hot → orange → red
-        this.hue      = Math.random() < 0.4 ? 45 : Math.random() < 0.6 ? 25 : 10; // degrees
-        this.trail    = [];
+        // Mostly bright white-hot / yellow, some orange, occasional red
+        const r = Math.random();
+        this.hue = r < 0.55 ? 48 : r < 0.85 ? 30 : 12;
+        this.trail = [];
       }
 
       update() {
         this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 6) this.trail.shift();
+        if (this.trail.length > 7) this.trail.shift();
 
         this.vx *= this.drag;
         this.vy *= this.drag;
@@ -83,12 +84,11 @@ function WeldSparks() {
       draw(ctx) {
         const alpha = 1 - this.life / this.maxLife;
 
-        // Trail
         if (this.trail.length > 1) {
           ctx.save();
-          ctx.globalAlpha = Math.min(1, alpha * 0.9);
-          ctx.strokeStyle = `hsl(${this.hue}, 100%, 75%)`;
-          ctx.lineWidth   = this.size * 0.6;
+          ctx.globalAlpha = Math.min(1, alpha);
+          ctx.strokeStyle = `hsl(${this.hue}, 100%, 78%)`;
+          ctx.lineWidth   = this.size * 0.7;
           ctx.lineCap     = 'round';
           ctx.beginPath();
           this.trail.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
@@ -96,54 +96,48 @@ function WeldSparks() {
           ctx.restore();
         }
 
-        // Core glow
         ctx.save();
-        ctx.globalAlpha = Math.min(1, alpha * 1.2);
-        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3.5);
-        grd.addColorStop(0,   `hsl(${this.hue}, 100%, 97%)`);
-        grd.addColorStop(0.35, `hsl(${this.hue}, 100%, 68%)`);
-        grd.addColorStop(1,   `hsla(${this.hue}, 100%, 45%, 0)`);
+        ctx.globalAlpha = Math.min(1, alpha * 1.3);
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+        grd.addColorStop(0,    `hsl(${this.hue}, 100%, 98%)`);
+        grd.addColorStop(0.35, `hsl(${this.hue}, 100%, 70%)`);
+        grd.addColorStop(1,    `hsla(${this.hue}, 100%, 45%, 0)`);
         ctx.fillStyle = grd;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
     }
 
-    // Welding arc flash (the bright spot at the torch tip)
+    // Bright arc-flash glow at the torch tip
     const drawArc = (x, y) => {
-      const flash = ctx.createRadialGradient(x, y, 0, x, y, 32);
-      flash.addColorStop(0,   'rgba(255,255,235, 1)');
-      flash.addColorStop(0.25, 'rgba(255,210,90, 0.85)');
-      flash.addColorStop(1,   'rgba(255,120,0, 0)');
+      const r = 38;
+      const flash = ctx.createRadialGradient(x, y, 0, x, y, r);
+      flash.addColorStop(0,    'rgba(255,255,240,1)');
+      flash.addColorStop(0.25, 'rgba(255,215,100,0.9)');
+      flash.addColorStop(1,    'rgba(255,120,0,0)');
       ctx.save();
-      ctx.globalAlpha = 0.75 + Math.random() * 0.25; // slight flicker
+      ctx.globalAlpha = 0.8 + Math.random() * 0.2; // flicker
       ctx.fillStyle   = flash;
       ctx.beginPath();
-      ctx.arc(x, y, 32, 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     };
 
-    // Create sparks — fewer on mobile for performance
-    const isMobile  = window.innerWidth < 640;
-    const sparkCount = isMobile ? 50 : 90;
-    const sparks    = Array.from({ length: sparkCount }, () => {
+    const isMobile   = window.innerWidth < 640;
+    const sparkCount = isMobile ? 55 : 100;
+    const sparks = Array.from({ length: sparkCount }, () => {
       const s = new Spark();
-      s.life  = Math.floor(Math.random() * s.maxLife); // stagger start
+      s.life = Math.floor(Math.random() * s.maxLife);
       return s;
     });
 
     let raf;
     const loop = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Arc flash at torch origin
-      const ox = canvas.width * 0.82;
-      const oy = canvas.height * 0.78;
-      drawArc(ox, oy);
-
+      drawArc(canvas.width * TIP_X, canvas.height * TIP_Y);
       sparks.forEach(s => { s.update(); s.draw(ctx); });
       raf = requestAnimationFrame(loop);
     };
@@ -156,11 +150,26 @@ function WeldSparks() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      aria-hidden="true"
-    />
+    <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 pointer-events-none">
+      {/* Welder's arm, glove & torch */}
+      <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full" aria-hidden="true">
+        {/* Forearm in sleeve, entering from bottom-right corner */}
+        <path d="M400,400 L228,228" stroke="#262626" strokeWidth="92" strokeLinecap="round" fill="none" />
+        {/* Orange cuff band near the glove */}
+        <path d="M272,272 L226,226" stroke="#f97316" strokeWidth="90" strokeLinecap="round" fill="none" opacity="0.95" />
+        {/* Gloved fist */}
+        <circle cx="223" cy="223" r="54" fill="#1c1310" />
+        {/* Torch barrel */}
+        <path d="M223,223 L259,134" stroke="#3a3a3a" strokeWidth="24" strokeLinecap="round" fill="none" />
+        {/* Trigger detail */}
+        <circle cx="236" cy="193" r="7" fill="#dc2626" />
+        {/* Copper nozzle / tip */}
+        <path d="M248,160 L262,128" stroke="#c97b3c" strokeWidth="13" strokeLinecap="round" fill="none" />
+      </svg>
+
+      {/* Spark canvas — aligned to torch tip via TIP_X / TIP_Y */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" aria-hidden="true" />
+    </div>
   );
 }
 
@@ -178,13 +187,8 @@ export default function Home() {
         <div className="absolute inset-0 opacity-5"
           style={{ backgroundImage: 'radial-gradient(circle, #f97316 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-        {/* 🔥 WELD SPARKS — bottom-right corner, full brightness */}
-        <div className="absolute inset-0">
-          <WeldSparks />
-        </div>
-
-        {/* Light gradient mask on the left only, so text stays readable without hiding sparks */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/40 to-transparent pointer-events-none" style={{ width: '65%' }} />
+        {/* 🔥 Welder figure with bright sparks — bottom-right corner */}
+        <WelderScene />
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 md:py-20">
